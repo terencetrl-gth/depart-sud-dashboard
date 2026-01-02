@@ -1,0 +1,941 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dashboard — Roadmap Départ Sud (Synchro)</title>
+  <style>
+    :root{
+      --bg:#070a14; --panel:#0f1730; --panel2:#111a33;
+      --text:#eef2ff; --muted:#b7c0ffcc; --line:#2a3566;
+      --accent:#5eead4; --accent2:#60a5fa; --warn:#fbbf24; --danger:#fb7185; --ok:#34d399;
+      --shadow: 0 14px 34px rgba(0,0,0,.40);
+      --r:18px; --r2:26px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:var(--sans); color:var(--text); line-height:1.55;
+      background:
+        radial-gradient(1100px 520px at 12% 0%, rgba(96,165,250,.22), transparent 62%),
+        radial-gradient(1100px 520px at 88% 8%, rgba(94,234,212,.16), transparent 62%),
+        linear-gradient(180deg, #0b1020, var(--bg) 65%);
+    }
+    .wrap{max-width:1200px;margin:0 auto;padding:28px 18px 70px}
+    header{
+      padding:26px 24px;
+      background:linear-gradient(135deg, rgba(96,165,250,.16), rgba(94,234,212,.08));
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:var(--r2);
+      box-shadow:var(--shadow);
+      overflow:hidden; position:relative;
+    }
+    header:before{
+      content:""; position:absolute; inset:-3px;
+      background:
+        radial-gradient(900px 260px at 25% 0%, rgba(94,234,212,.22), transparent 60%),
+        radial-gradient(900px 260px at 70% 20%, rgba(96,165,250,.22), transparent 60%);
+      filter: blur(12px); opacity:.9; pointer-events:none;
+    }
+    header > *{position:relative}
+    .kicker{font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-size:.82rem}
+    h1{margin:6px 0 0;font-size:2.05rem;line-height:1.15}
+    .sub{margin:10px 0 0;color:var(--muted);max-width:105ch}
+    .mono{font-family:var(--mono)}
+    .chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+    .chip{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:8px 12px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(17,26,51,.55);
+      color:var(--text); font-size:.92rem;
+      backdrop-filter: blur(6px);
+    }
+    .dot{width:8px;height:8px;border-radius:99px;background:var(--accent)}
+    .dot.blue{background:var(--accent2)}
+    .dot.warn{background:var(--warn)}
+    .dot.danger{background:var(--danger)}
+    .dot.ok{background:var(--ok)}
+
+    .btnRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    button{
+      padding:10px 12px;border-radius:12px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.06);
+      color:var(--text); cursor:pointer;
+    }
+    button:hover{background:rgba(255,255,255,.10)}
+    button.primary{border-color:rgba(94,234,212,.45);background:rgba(94,234,212,.10)}
+    button.danger{border-color:rgba(251,113,133,.45);background:rgba(251,113,133,.10)}
+    button.blue{border-color:rgba(96,165,250,.45);background:rgba(96,165,250,.10)}
+
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px;margin-top:16px}
+    .card{
+      background:linear-gradient(180deg, rgba(17,26,51,.96), rgba(15,23,48,.96));
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:var(--r);
+      box-shadow:var(--shadow);
+      padding:18px;
+      min-width:0;
+    }
+    .span-12{grid-column:span 12}
+    .span-7{grid-column:span 7}
+    .span-5{grid-column:span 5}
+    @media (max-width:980px){
+      .span-7,.span-5{grid-column:span 12}
+    }
+    h2{margin:0 0 10px;font-size:1.18rem}
+    .muted{color:var(--muted)}
+
+    /* KPI */
+    .kpiRow{display:grid;grid-template-columns:repeat(12,1fr);gap:14px;margin-top:10px}
+    .kpi{
+      grid-column:span 3;
+      padding:14px;border-radius:14px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.03);
+      min-width:0;
+      display:flex;flex-direction:column;gap:6px;
+    }
+    @media (max-width:980px){ .kpi{grid-column:span 12} }
+    .kpi .label{font-size:.85rem;color:var(--muted)}
+    .kpi .value{font-size:1.35rem;font-weight:850;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .kpi .note{font-size:.85rem;color:var(--muted)}
+
+    /* Inputs */
+    .controls{display:grid;grid-template-columns:repeat(12,1fr);gap:12px;margin-top:12px;align-items:end}
+    .field{grid-column:span 4;min-width:0}
+    .field.wide{grid-column:span 8}
+    .field.narrow{grid-column:span 3}
+    @media (max-width:980px){ .field,.field.wide,.field.narrow{grid-column:span 12} }
+    label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:6px}
+    input[type="number"], input[type="text"], input[type="password"], select{
+      width:100%; padding:10px 12px; border-radius:12px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(0,0,0,.18); color:var(--text); outline:none;
+    }
+    input[type="range"]{width:100%}
+
+    /* Tables */
+    table{width:100%;border-collapse:collapse;margin-top:10px;border-radius:14px;overflow:hidden}
+    th,td{padding:10px;border-bottom:1px solid rgba(255,255,255,.08);vertical-align:top}
+    th{text-align:left;font-size:.88rem;color:#dbe6ff;background:rgba(255,255,255,.04)}
+    td{color:var(--muted);font-size:.92rem}
+    tr:last-child td{border-bottom:none}
+    .right{text-align:right}
+
+    /* Progress */
+    .progressWrap{
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.18);
+      border-radius:999px;
+      overflow:hidden;
+      height:16px;
+      margin-top:10px;
+    }
+    .progressBar{
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg, rgba(96,165,250,.85), rgba(94,234,212,.85));
+    }
+
+    /* Roadmap */
+    details.phase{
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.03);
+      border-radius:14px;
+      padding:10px 12px;
+      margin-top:10px;
+    }
+    details.phase[open]{background:rgba(255,255,255,.04)}
+    summary{
+      cursor:pointer; list-style:none;
+      display:flex;align-items:center;gap:10px;
+      font-weight:900; color:var(--text);
+    }
+    summary::-webkit-details-marker{display:none}
+    .phaseMeta{margin-left:auto;color:var(--muted);font-weight:600;font-size:.9rem}
+    .phaseBar{
+      height:10px;border-radius:999px;overflow:hidden;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.18);
+      margin-top:10px;
+    }
+    .phaseFill{height:100%;width:0%;background:linear-gradient(90deg, rgba(94,234,212,.75), rgba(96,165,250,.75))}
+    .tasks{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+    .task{
+      display:flex;align-items:flex-start;gap:10px;
+      padding:10px 12px;border-radius:14px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(0,0,0,.12);
+    }
+    .task input[type="checkbox"]{margin-top:3px;transform:scale(1.1)}
+    .taskText{min-width:0}
+    .taskText strong{display:block}
+    .taskText span{display:block;color:var(--muted);font-size:.9rem;margin-top:2px}
+    .taskBtns{display:flex;gap:6px;margin-left:10px}
+    .tinyBtn{padding:6px 8px;border-radius:10px;font-size:.9rem}
+
+    /* Status ribbon */
+    .statusLine{
+      margin-top:10px;
+      display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+      color:var(--muted);
+    }
+    .badge{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(0,0,0,.18);
+      font-size:.88rem;
+    }
+    .badge.ok{border-color:rgba(52,211,153,.35);background:rgba(52,211,153,.10);color:#d1fae5}
+    .badge.warn{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.10);color:#fff7ed}
+    .badge.danger{border-color:rgba(251,113,133,.35);background:rgba(251,113,133,.10);color:#ffe4e6}
+
+    .foot{
+      margin-top:16px;color:var(--muted);font-size:.88rem;
+      display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between
+    }
+
+    /* PRINT */
+    @page { margin: 12mm; }
+    @media print{
+      body{background:#fff !important;color:#000 !important}
+      .wrap{max-width:none;padding:0}
+      header,.card{box-shadow:none !important}
+      header{border-radius:0 !important;border:1px solid #ddd !important;background:#fff !important}
+      header:before{display:none !important}
+      .chip{background:#fff !important;color:#000 !important;border:1px solid #ddd !important}
+      .card{background:#fff !important;color:#000 !important;border:1px solid #ddd !important}
+      .muted, td, label, .phaseMeta{color:#222 !important}
+      th{background:#f3f4f6 !important;color:#000 !important}
+      input, select, button{display:none !important}
+      .no-print{display:none !important}
+      details.phase{border:1px solid #ddd !important;background:#fff !important}
+      .task{border:1px solid #ddd !important;background:#fff !important}
+      .progressWrap, .phaseBar{border:1px solid #bbb !important;background:#fff !important}
+      .progressBar, .phaseFill{background:#111 !important}
+      details.phase{break-inside:avoid; page-break-inside:avoid}
+      table{break-inside:avoid; page-break-inside:avoid}
+      .task{break-inside:avoid; page-break-inside:avoid}
+      a{color:#000 !important;text-decoration:underline}
+    }
+  </style>
+
+  <!-- Firebase SDKs (compat = simple sans bundler) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <div class="kicker">Dashboard • Roadmap • Départ dans l’Hérault • Synchro temps réel</div>
+      <h1>Roadmap partagée : vous cochez → ça se coche (instant)</h1>
+      <p class="sub">
+        Entrez le même <strong>Code couple</strong> sur vos deux appareils. Ce code est <strong>hashé</strong> (on ne l’enregistre pas tel quel).
+        <br><span class="muted">Astuce : un code long et mémorable (ex: <span class="mono">Frontignan_Sept2026_❤️</span>).</span>
+      </p>
+
+      <div class="controls">
+        <div class="field wide">
+          <label for="roomCode">Code couple (secret)</label>
+          <input id="roomCode" type="password" placeholder="Ex: frontignan2026 (mettez le même sur les deux)" />
+        </div>
+        <div class="field narrow">
+          <label for="roomHint">Conseil</label>
+          <input id="roomHint" type="text" placeholder="Pense-bête optionnel" />
+        </div>
+        <div class="field narrow">
+          <button class="blue" id="btnConnect" style="width:100%">🔗 Connecter</button>
+        </div>
+      </div>
+
+      <div class="statusLine">
+        <span class="badge warn" id="syncBadge">Synchro : non connectée</span>
+        <span class="badge" id="roomBadge">Room : —</span>
+        <span class="badge" id="lastBadge">Dernière maj : —</span>
+      </div>
+
+      <div class="chips">
+        <div class="chip"><span class="dot ok"></span><strong>Objectif :</strong>&nbsp;installés pour la rentrée</div>
+        <div class="chip"><span class="dot blue"></span><strong>Stratégie :</strong>&nbsp;vente + location (entrée août)</div>
+        <div class="chip"><span class="dot warn"></span><strong>Risque :</strong>&nbsp;baisse de revenus</div>
+        <div class="chip"><span class="dot danger"></span><strong>Piège :</strong>&nbsp;double logement</div>
+      </div>
+
+      <div class="btnRow no-print">
+        <button class="primary" onclick="printWithOpenPhases()">🖨️ Imprimer / PDF (roadmap complète)</button>
+        <button onclick="toggleAllPhases(true)">🔽 Tout ouvrir</button>
+        <button onclick="toggleAllPhases(false)">🔼 Tout fermer</button>
+        <button class="danger" onclick="hardResetLocal()">🧨 Reset local (appareil)</button>
+      </div>
+    </header>
+
+    <!-- Progress -->
+    <section class="grid">
+      <div class="card span-12">
+        <h2>📈 Progression vers septembre 2026</h2>
+        <div class="kpiRow">
+          <div class="kpi"><div class="label">Aujourd’hui</div><div class="value mono" id="kToday">—</div><div class="note">Date locale</div></div>
+          <div class="kpi"><div class="label">Objectif</div><div class="value mono" id="kTarget">01/09/2026</div><div class="note">Rentrée</div></div>
+          <div class="kpi"><div class="label">Temps restant</div><div class="value mono" id="kRemaining">—</div><div class="note">Jours</div></div>
+          <div class="kpi"><div class="label">Avancement</div><div class="value mono" id="kProgressPct">—</div><div class="note">01/01 → 01/09</div></div>
+        </div>
+        <div class="progressWrap"><div class="progressBar" id="progressBar"></div></div>
+      </div>
+    </section>
+
+    <!-- Simulator -->
+    <section class="grid">
+      <div class="card span-7">
+        <h2>🧮 Simulateur : reste mensuel après vente</h2>
+        <p class="muted" style="margin:0">
+          Dépenses après vente = <span class="mono">3 057,56€</span> + loyer CC.
+        </p>
+
+        <div class="controls no-print">
+          <div class="field wide">
+            <label for="rentRange">Loyer charges comprises (€/mois)</label>
+            <input id="rentRange" type="range" min="800" max="1400" step="10" />
+          </div>
+          <div class="field narrow">
+            <label for="rentInput">Valeur loyer</label>
+            <input id="rentInput" type="number" min="0" step="10" />
+          </div>
+          <div class="field narrow">
+            <label for="incomeDrop">Décote revenus</label>
+            <select id="incomeDrop">
+              <option value="0">0%</option>
+              <option value="10">-10%</option>
+              <option value="20">-20%</option>
+            </select>
+          </div>
+          <div class="field narrow">
+            <label for="overlapMonths">Mois “double logement”</label>
+            <input id="overlapMonths" type="number" min="0" max="6" step="1" />
+          </div>
+        </div>
+
+        <div class="kpiRow">
+          <div class="kpi">
+            <div class="label">Dépenses après vente (hors loyer)</div>
+            <div class="value mono" id="baseAfterSale">—</div>
+            <div class="note">Fixe recalculé</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Dépenses après vente (avec loyer)</div>
+            <div class="value mono" id="afterSaleWithRent">—</div>
+            <div class="note">Base + loyer</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Revenus simulés</div>
+            <div class="value mono" id="simIncome">—</div>
+            <div class="note">Avec décote</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Reste mensuel estimé</div>
+            <div class="value mono" id="simRemainder">—</div>
+            <div class="note" id="simStatus">—</div>
+          </div>
+        </div>
+
+        <h3>Double logement (si chevauchement)</h3>
+        <table>
+          <thead><tr><th>Hypothèse</th><th class="right">Coût mensuel</th><th class="right">Impact total</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Dépenses actuelles + loyer</td>
+              <td class="right mono" id="overlapMonthly">—</td>
+              <td class="right mono" id="overlapTotal">—</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card span-5">
+        <h2>💰 Estimateur cash vente</h2>
+
+        <div class="controls no-print">
+          <div class="field narrow">
+            <label for="salePrice">Prix de vente</label>
+            <input id="salePrice" type="number" min="100000" step="1000" />
+          </div>
+          <div class="field narrow">
+            <label for="agencyPct">Agence (%)</label>
+            <input id="agencyPct" type="number" min="0" max="10" step="0.1" />
+          </div>
+          <div class="field narrow">
+            <label for="crd">CRD</label>
+            <input id="crd" type="number" min="0" step="1" />
+          </div>
+          <div class="field narrow">
+            <label for="ira">IRA (approx.)</label>
+            <input id="ira" type="number" min="0" step="1" />
+          </div>
+          <div class="field narrow">
+            <label for="saleFees">Diag/frais divers</label>
+            <input id="saleFees" type="number" min="0" step="1" />
+          </div>
+        </div>
+
+        <table>
+          <thead><tr><th>Élément</th><th class="right">Montant</th></tr></thead>
+          <tbody>
+            <tr><td>Prix</td><td class="right mono" id="tSalePrice">—</td></tr>
+            <tr><td>Agence</td><td class="right mono" id="tAgency">—</td></tr>
+            <tr><td>CRD</td><td class="right mono" id="tCRD">—</td></tr>
+            <tr><td>IRA</td><td class="right mono" id="tIRA">—</td></tr>
+            <tr><td>Frais</td><td class="right mono" id="tSaleFees">—</td></tr>
+            <tr><td><strong>Net estimé</strong></td><td class="right mono"><strong id="tNet">—</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ROADMAP -->
+    <section class="grid">
+      <div class="card span-12">
+        <h2>🗺️ Roadmap (synchro live)</h2>
+        <p class="muted" style="margin:0">
+          Même code = même roadmap. Ajouts / coches / edits se voient instantanément.
+        </p>
+
+        <div id="roadmap"></div>
+
+        <div class="btnRow no-print">
+          <button onclick="addTaskToPhase()">➕ Ajouter une tâche à une phase</button>
+          <button onclick="markAll(false)">☐ Tout décocher</button>
+          <button onclick="markAll(true)">☑ Tout cocher</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="foot">
+      <div class="muted">Synchro temps réel via Firestore • Le code est hashé côté navigateur • “Last write wins”.</div>
+      <div class="mono">Dashboard Sync — v1</div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  // -----------------------------
+  // 1) 🔧 Firebase config : À REMPLACER
+  // -----------------------------
+  const firebaseConfig = {
+  apiKey: "AIzaSyDzqeV8Gy1mOHj9RZ8oeOCV_9EZroLhipY",
+  authDomain: "depart-sud.firebaseapp.com",
+  projectId: "depart-sud",
+  storageBucket: "depart-sud.firebasestorage.app",
+  messagingSenderId: "575813325500",
+  appId: "1:575813325500:web:5f049f1c137e65616ff6b9",
+  measurementId: "G-70LVTB8JGQ"
+};
+
+
+  // Init Firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  // -----------------------------
+  // Defaults (vos chiffres)
+  // -----------------------------
+  const DEFAULTS = {
+    incomeCurrent: 4912.96,
+    expensesCurrent: 4388.00,
+    ownerCostsDisappear: 1330.44,
+    rentCC: 1050,
+    incomeDropPct: 10,
+    overlapMonths: 0,
+    salePrice: 210000,
+    agencyPct: 4.5,
+    crd: 175585,
+    ira: 1449,
+    saleFees: 1000
+  };
+
+  const LS_LOCAL = "departSud_sync_local";
+  const euro = (n) => {
+    const sign = n < 0 ? "-" : "";
+    const abs = Math.abs(n);
+    return sign + abs.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
+  };
+  const euro0 = (n) => (n < 0 ? "-" : "") + Math.abs(n).toLocaleString("fr-FR", { maximumFractionDigits: 0 }) + " €";
+  const clamp = (x,a,b)=>Math.min(b,Math.max(a,x));
+  const $ = (id)=>document.getElementById(id);
+
+  // Client id (pour éviter les boucles)
+  const clientId = (() => {
+    const k = "departSud_clientId";
+    let v = localStorage.getItem(k);
+    if(!v){ v = "c_" + Math.random().toString(16).slice(2) + "_" + Date.now(); localStorage.setItem(k,v); }
+    return v;
+  })();
+
+  // -----------------------------
+  // Roadmap par défaut (même base qu'avant)
+  // -----------------------------
+  const defaultRoadmap = [
+    { id:"p1", title:"Janvier 2026 — Mise en route", meta:"Vente + CV + cadrage", open:true,
+      tasks:[
+        {id:"p1t1", title:"Vente : 3 estimations + stratégie (prix/mandat)", desc:"Décider rapide : mandat simple/exclu, prix cible, plan photos.", done:false},
+        {id:"p1t2", title:"Vente : diagnostics + dossier copro", desc:"DPE/élec + PV AG, charges, TF, etc.", done:false},
+        {id:"p1t3", title:"Emploi : CV + LinkedIn + ciblage (15 entreprises)", desc:"Préparer pitch reconversion (30 sec + 2 min).", done:false},
+        {id:"p1t4", title:"Logement : règle loyer fixée", desc:"Cible 950–1 050€ CC / plafond 1 100€ CC.", done:false},
+      ]
+    },
+    { id:"p2", title:"Février 2026 — Mise en vente + pipeline emploi", meta:"Annonce + candidatures", open:false,
+      tasks:[
+        {id:"p2t1", title:"Mise en vente officielle (annonce + photos)", desc:"Home staging léger + annonce nickel.", done:false},
+        {id:"p2t2", title:"Dossier location PDF unique prêt", desc:"Identité, fiches de paie, impôts, justificatifs.", done:false},
+        {id:"p2t3", title:"Candidatures : 6–10/semaine + relances", desc:"Objectif : premiers entretiens en février.", done:false},
+      ]
+    },
+    { id:"p3", title:"Mars 2026 — Accélération + garde plan A/B", meta:"Offres + enfants", open:false,
+      tasks:[
+        {id:"p3t1", title:"Vente : viser offres (ajuster si stagne 3 semaines)", desc:"Prix/présentation/diffusion : pivot rapide.", done:false},
+        {id:"p3t2", title:"Garde : plan A crèche + plan B assmat/MAM", desc:"Plan B obligatoire pour éviter l’impasse.", done:false},
+        {id:"p3t3", title:"Communes : top 3 (Frontignan + 2)", desc:"Selon loyers, trajets, écoles, garde.", done:false},
+        {id:"p3t4", title:"Emploi : 2–4 process actifs", desc:"Entretiens en chaîne, ajuster CV selon retours.", done:false},
+      ]
+    },
+    { id:"p4", title:"Avril 2026 — Sécuriser la rentrée", meta:"École + logement", open:false,
+      tasks:[
+        {id:"p4t1", title:"École CP : dossier prêt + dépôt (commune probable)", desc:"Être prêt tôt = éviter les galères de place.", done:false},
+        {id:"p4t2", title:"Location : intensifier visites + réactivité", desc:"Répondre vite = passer devant la file.", done:false},
+        {id:"p4t3", title:"Budget : test stress (-10% / -20%)", desc:"Valider que loyer + charges restent OK.", done:false},
+      ]
+    },
+    { id:"p5", title:"Mai 2026 — Verrouillage", meta:"Compromis + promesse", open:false,
+      tasks:[
+        {id:"p5t1", title:"Vente : compromis signé (objectif)", desc:"Sinon pivot (prix/stratégie) immédiatement.", done:false},
+        {id:"p5t2", title:"Emploi : promesse/contrat en vue", desc:"Démarrage fin août / début sept si possible.", done:false},
+        {id:"p5t3", title:"Plan anti-double logement validé", desc:"Chevauchement minimisé + option hébergement amis.", done:false},
+      ]
+    },
+    { id:"p6", title:"Juin 2026 — Bail", meta:"Logement sécurisé", open:false,
+      tasks:[
+        {id:"p6t1", title:"Bail signé (entrée août idéalement)", desc:"Objectif : installation avant rentrée.", done:false},
+        {id:"p6t2", title:"Garde confirmée (plan A ou B)", desc:"+ périscolaire si nécessaire.", done:false},
+      ]
+    },
+    { id:"p7", title:"Juillet–Août 2026 — Exécution", meta:"Vente + déménagement", open:false,
+      tasks:[
+        {id:"p7t1", title:"Acte de vente + cash net disponible", desc:"Remboursement prêt + buffer prêt.", done:false},
+        {id:"p7t2", title:"Déménagement + installation", desc:"Énergie, box, assurances, paperasse.", done:false},
+        {id:"p7t3", title:"École/garde : finalisation", desc:"Derniers papiers, horaires, trajets.", done:false},
+      ]
+    },
+    { id:"p8", title:"Septembre 2026 — Stabilisation", meta:"Rentrée + nouveau rythme", open:false,
+      tasks:[
+        {id:"p8t1", title:"Rentrée CP + garde petite : routine", desc:"Stabiliser les horaires, respiration.", done:false},
+        {id:"p8t2", title:"Démarrage poste salarié", desc:"Camputech = montée progressive ensuite.", done:false},
+      ]
+    },
+  ];
+
+  // Local bootstrap
+  function loadLocal(){
+    try{
+      const raw = localStorage.getItem(LS_LOCAL);
+      if(!raw) return null;
+      return JSON.parse(raw);
+    }catch(e){ return null; }
+  }
+  function saveLocal(obj){
+    localStorage.setItem(LS_LOCAL, JSON.stringify(obj));
+  }
+
+  // App state
+  let state = {...DEFAULTS};
+  let roadmap = JSON.parse(JSON.stringify(defaultRoadmap));
+
+  // Sync
+  let roomId = null;
+  let unsub = null;
+  let applyingRemote = false;
+  let lastRemoteUpdatedAt = 0;
+  let pendingWriteTimer = null;
+
+  function setBadge(kind, text){
+    const b = $("syncBadge");
+    b.className = "badge " + kind;
+    b.textContent = text;
+  }
+  function setRoomBadge(text){ $("roomBadge").textContent = "Room : " + text; }
+  function setLastBadge(ts){
+    $("lastBadge").textContent = "Dernière maj : " + (ts ? new Date(ts).toLocaleString("fr-FR") : "—");
+  }
+
+  async function sha256Hex(str){
+    const enc = new TextEncoder().encode(str);
+    const hash = await crypto.subtle.digest("SHA-256", enc);
+    const bytes = new Uint8Array(hash);
+    return [...bytes].map(b=>b.toString(16).padStart(2,"0")).join("");
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, m => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+    }[m]));
+  }
+  function phaseProgress(phase){
+    const total = phase.tasks.length || 1;
+    const done = phase.tasks.filter(t => t.done).length;
+    const pct = Math.round((done/total)*100);
+    return {done,total,pct};
+  }
+
+  // -----------------------------
+  // Rendering
+  // -----------------------------
+  function renderRoadmap(){
+    const root = document.getElementById("roadmap");
+    root.innerHTML = "";
+    roadmap.forEach(phase => {
+      const prog = phaseProgress(phase);
+      const d = document.createElement("details");
+      d.className = "phase";
+      d.open = !!phase.open;
+
+      const s = document.createElement("summary");
+      s.innerHTML = `
+        <span>📍 ${escapeHtml(phase.title)}</span>
+        <span class="phaseMeta">${escapeHtml(phase.meta)} • ${prog.done}/${prog.total} • ${prog.pct}%</span>
+      `;
+      s.addEventListener("click", () => {
+        setTimeout(() => {
+          phase.open = d.open;
+          scheduleWrite();
+        }, 0);
+      });
+
+      const bar = document.createElement("div");
+      bar.className = "phaseBar";
+      bar.innerHTML = `<div class="phaseFill" style="width:${prog.pct}%;"></div>`;
+
+      const tasks = document.createElement("div");
+      tasks.className = "tasks";
+
+      phase.tasks.forEach(t => {
+        const row = document.createElement("div");
+        row.className = "task";
+
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.checked = !!t.done;
+        cb.addEventListener("change", () => {
+          t.done = cb.checked;
+          scheduleWrite();
+          renderRoadmap();
+        });
+
+        const txt = document.createElement("div");
+        txt.className = "taskText";
+        txt.innerHTML = `<strong>${escapeHtml(t.title)}</strong><span>${escapeHtml(t.desc || "")}</span>`;
+
+        const btns = document.createElement("div");
+        btns.className = "taskBtns no-print";
+
+        const edit = document.createElement("button");
+        edit.className = "tinyBtn";
+        edit.textContent = "✏️";
+        edit.title = "Modifier";
+        edit.addEventListener("click", () => {
+          const nt = prompt("Titre :", t.title);
+          if(nt === null) return;
+          const nd = prompt("Description :", t.desc || "");
+          if(nd === null) return;
+          t.title = nt.trim() || t.title;
+          t.desc = nd.trim();
+          scheduleWrite();
+          renderRoadmap();
+        });
+
+        const del = document.createElement("button");
+        del.className = "tinyBtn";
+        del.textContent = "🗑️";
+        del.title = "Supprimer";
+        del.addEventListener("click", () => {
+          phase.tasks = phase.tasks.filter(x => x.id !== t.id);
+          scheduleWrite();
+          renderRoadmap();
+        });
+
+        btns.appendChild(edit);
+        btns.appendChild(del);
+
+        row.appendChild(cb);
+        row.appendChild(txt);
+        row.appendChild(btns);
+
+        tasks.appendChild(row);
+      });
+
+      d.appendChild(s);
+      d.appendChild(bar);
+      d.appendChild(tasks);
+      root.appendChild(d);
+    });
+  }
+
+  // Progress / simulators
+  function updateProgress(){
+    const today = new Date();
+    const start = new Date("2026-01-01T00:00:00");
+    const target = new Date("2026-09-01T00:00:00");
+    const total = target - start;
+    const elapsed = clamp(today - start, 0, total);
+    const pct = total <= 0 ? 100 : (elapsed / total) * 100;
+    const daysLeft = Math.ceil((target - today) / (1000*60*60*24));
+
+    $("kToday").textContent = today.toLocaleDateString("fr-FR");
+    $("kTarget").textContent = "01/09/2026";
+    $("kRemaining").textContent = (daysLeft >= 0 ? daysLeft : 0).toLocaleString("fr-FR") + " jours";
+    $("kProgressPct").textContent = pct.toFixed(1).replace(".", ",") + "%";
+    $("progressBar").style.width = pct.toFixed(1) + "%";
+  }
+
+  function updateSimulator(){
+    const rent = Number(state.rentCC) || 0;
+    const drop = Number(state.incomeDropPct) || 0;
+    const overlap = Number(state.overlapMonths) || 0;
+
+    const baseAfterSale = state.expensesCurrent - state.ownerCostsDisappear;
+    const afterSaleWithRent = baseAfterSale + rent;
+    const simIncome = state.incomeCurrent * (1 - (drop/100));
+    const remainder = simIncome - afterSaleWithRent;
+
+    const overlapMonthly = state.expensesCurrent + rent;
+    const overlapTotal = overlapMonthly * overlap;
+
+    $("baseAfterSale").textContent = euro(baseAfterSale);
+    $("afterSaleWithRent").textContent = euro(afterSaleWithRent);
+    $("simIncome").textContent = euro(simIncome);
+    $("simRemainder").textContent = euro(remainder);
+
+    let status = "Dans le vert (marge).";
+    if(remainder < 0) status = "Dans le rouge → loyer/charges/revenus à ajuster.";
+    else if(remainder < 200) status = "Vert… mais serré (marge < 200€).";
+    $("simStatus").textContent = status;
+
+    $("overlapMonthly").textContent = euro(overlapMonthly);
+    $("overlapTotal").textContent = euro(overlapTotal);
+
+    // Sync inputs
+    $("rentRange").value = rent;
+    $("rentInput").value = rent;
+    $("incomeDrop").value = drop;
+    $("overlapMonths").value = overlap;
+  }
+
+  function updateSale(){
+    const salePrice = Number(state.salePrice) || 0;
+    const agencyPct = Number(state.agencyPct) || 0;
+    const crd = Number(state.crd) || 0;
+    const ira = Number(state.ira) || 0;
+    const fees = Number(state.saleFees) || 0;
+
+    const agency = salePrice * (agencyPct/100);
+    const net = salePrice - agency - crd - ira - fees;
+
+    $("tSalePrice").textContent = euro0(salePrice);
+    $("tAgency").textContent = euro0(agency);
+    $("tCRD").textContent = euro0(crd);
+    $("tIRA").textContent = euro0(ira);
+    $("tSaleFees").textContent = euro0(fees);
+    $("tNet").textContent = euro0(net);
+
+    $("salePrice").value = salePrice;
+    $("agencyPct").value = agencyPct;
+    $("crd").value = crd;
+    $("ira").value = ira;
+    $("saleFees").value = fees;
+  }
+
+  function updateAll(){
+    updateProgress();
+    updateSimulator();
+    updateSale();
+    renderRoadmap();
+  }
+
+  // -----------------------------
+  // Sync logic
+  // -----------------------------
+  function currentPayload(){
+    return {
+      version: 1,
+      clientId,
+      updatedAt: Date.now(),
+      state,
+      roadmap
+    };
+  }
+
+  function scheduleWrite(){
+    // Toujours garder une copie locale (au cas où)
+    saveLocal({state, roadmap});
+
+    if(!roomId) return; // pas connecté -> local only
+    if(applyingRemote) return; // on applique un remote -> pas d'écho
+
+    if(pendingWriteTimer) clearTimeout(pendingWriteTimer);
+    pendingWriteTimer = setTimeout(async () => {
+      try{
+        const payload = currentPayload();
+        await db.collection("rooms").doc(roomId).set(payload, { merge: true });
+        setLastBadge(payload.updatedAt);
+      }catch(e){
+        console.error(e);
+        setBadge("danger", "Synchro : erreur d’écriture (voir console)");
+      }
+    }, 250);
+  }
+
+  async function connectRoom(code){
+    if(!code || code.trim().length < 6){
+      alert("Mets un code un peu solide (min 6 caractères).");
+      return;
+    }
+    const hash = await sha256Hex(code.trim());
+    roomId = hash;
+    setRoomBadge(hash.slice(0,8) + "…");
+    setBadge("warn", "Synchro : connexion…");
+
+    // stop previous
+    if(unsub) unsub();
+
+    const docRef = db.collection("rooms").doc(roomId);
+
+    // First: if room empty, seed from local or defaults
+    const snap = await docRef.get();
+    if(!snap.exists){
+      const local = loadLocal();
+      if(local?.state) state = {...DEFAULTS, ...local.state};
+      if(local?.roadmap) roadmap = local.roadmap;
+      const payload = currentPayload();
+      await docRef.set(payload, { merge: true });
+      lastRemoteUpdatedAt = payload.updatedAt;
+      setLastBadge(payload.updatedAt);
+    }
+
+    // Realtime listener
+    unsub = docRef.onSnapshot((s) => {
+      if(!s.exists) return;
+      const data = s.data();
+      if(!data || !data.updatedAt) return;
+
+      // Ignore older updates
+      if(data.updatedAt <= lastRemoteUpdatedAt) return;
+
+      // If it’s our own update, still accept but avoid loop
+      lastRemoteUpdatedAt = data.updatedAt;
+      setLastBadge(data.updatedAt);
+
+      applyingRemote = true;
+      try{
+        if(data.state) state = {...DEFAULTS, ...data.state};
+        if(data.roadmap) roadmap = data.roadmap;
+        updateAll();
+        setBadge("ok", "Synchro : connectée ✅");
+      }finally{
+        // release after a tick (avoid immediate echo)
+        setTimeout(() => { applyingRemote = false; }, 0);
+      }
+    }, (err) => {
+      console.error(err);
+      setBadge("danger", "Synchro : erreur (règles / config ?) ❌");
+    });
+
+    // Once connected, push local -> remote if local newer (optional)
+    setBadge("ok", "Synchro : connectée ✅");
+  }
+
+  // -----------------------------
+  // UI bindings
+  // -----------------------------
+  function bind(){
+    // Connect
+    $("btnConnect").addEventListener("click", async () => {
+      const code = $("roomCode").value;
+      await connectRoom(code);
+      // Save hint locally only (for your memory)
+      localStorage.setItem("departSud_room_hint", $("roomHint").value || "");
+    });
+
+    // Restore hint
+    $("roomHint").value = localStorage.getItem("departSud_room_hint") || "";
+
+    // Simulator inputs
+    $("rentRange").addEventListener("input", (e)=>{ state.rentCC = Number(e.target.value); updateSimulator(); scheduleWrite(); });
+    $("rentInput").addEventListener("input", (e)=>{ state.rentCC = Number(e.target.value); updateSimulator(); scheduleWrite(); });
+    $("incomeDrop").addEventListener("change",(e)=>{ state.incomeDropPct = Number(e.target.value); updateSimulator(); scheduleWrite(); });
+    $("overlapMonths").addEventListener("input",(e)=>{ state.overlapMonths = Number(e.target.value); updateSimulator(); scheduleWrite(); });
+
+    // Sale inputs
+    $("salePrice").addEventListener("input",(e)=>{ state.salePrice = Number(e.target.value); updateSale(); scheduleWrite(); });
+    $("agencyPct").addEventListener("input",(e)=>{ state.agencyPct = Number(e.target.value); updateSale(); scheduleWrite(); });
+    $("crd").addEventListener("input",(e)=>{ state.crd = Number(e.target.value); updateSale(); scheduleWrite(); });
+    $("ira").addEventListener("input",(e)=>{ state.ira = Number(e.target.value); updateSale(); scheduleWrite(); });
+    $("saleFees").addEventListener("input",(e)=>{ state.saleFees = Number(e.target.value); updateSale(); scheduleWrite(); });
+  }
+
+  // Public actions
+  window.toggleAllPhases = (open) => {
+    roadmap.forEach(p => p.open = !!open);
+    renderRoadmap();
+    scheduleWrite();
+  };
+  window.markAll = (val) => {
+    roadmap.forEach(p => p.tasks.forEach(t => t.done = !!val));
+    renderRoadmap();
+    scheduleWrite();
+  };
+  window.addTaskToPhase = () => {
+    const phaseTitles = roadmap.map((p,i) => `${i+1}. ${p.title}`).join("\n");
+    const idxStr = prompt("Dans quelle phase ajouter la tâche ?\n" + phaseTitles + "\n\nTape le numéro (ex: 2)");
+    if(!idxStr) return;
+    const idx = Number(idxStr) - 1;
+    if(idx < 0 || idx >= roadmap.length) return alert("Numéro de phase invalide.");
+    const title = prompt("Titre de la tâche :");
+    if(!title) return;
+    const desc = prompt("Description (optionnel) :") || "";
+    const id = "c" + Date.now();
+    roadmap[idx].tasks.push({id, title, desc, done:false});
+    roadmap[idx].open = true;
+    renderRoadmap();
+    scheduleWrite();
+  };
+  window.printWithOpenPhases = () => {
+    toggleAllPhases(true);
+    setTimeout(() => window.print(), 100);
+  };
+  window.hardResetLocal = () => {
+    if(!confirm("Reset LOCAL : ça remet ton appareil à zéro (la room cloud reste). Continuer ?")) return;
+    localStorage.removeItem(LS_LOCAL);
+    state = {...DEFAULTS};
+    roadmap = JSON.parse(JSON.stringify(defaultRoadmap));
+    updateAll();
+    // ne push pas automatiquement (pour éviter d’écraser la room)
+    setBadge("warn", "Local reset fait. Reconnecte et choisis quoi pousser.");
+  };
+
+  // Init: load local first
+  const local = loadLocal();
+  if(local?.state) state = {...DEFAULTS, ...local.state};
+  if(local?.roadmap) roadmap = local.roadmap;
+
+  setBadge("warn", "Synchro : non connectée");
+  setRoomBadge("—");
+  setLastBadge(0);
+
+  bind();
+  updateAll();
+  setInterval(updateProgress, 60_000);
+})();
+</script>
+</body>
+</html>
